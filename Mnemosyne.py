@@ -132,12 +132,10 @@ def open_text(text):
         else:
             print(f'{field.capitalize()}: {entry}')
 
-def call_librarian(display=display_case):
-    display_texts(display_case)
-    userinput = input('Instructions: ')
-    userinput = userinput.split()
-    command = userinput[0]
-    params = userinput[1:]
+def call_librarian(display,input):
+    input = input.split()
+    command = input[0]
+    params = input[1:]
 
     # Search commands:
     # [field] [entry]
@@ -212,15 +210,18 @@ def call_librarian(display=display_case):
 
     #if command == 'quit' or 'exit':
         #sys.exit()
-
+    display_texts(display)
     write(display)
     print('\n')
 
     return display
 
 
-# Initialize:
+# Initialize: main loop
 try:
     while True:
-        display_case = call_librarian(display_case)
+        user_input = input('Instructions: ')
+        if user_input in ('quit','exit'):
+            break
+        display_case = call_librarian(display_case,user_input)
 except: print('Something went wrong')
