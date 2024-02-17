@@ -3,10 +3,24 @@
 
 import json
 
-# Currently requires library.json to be in the same folder as MnemosyneCL.py
-with open('library.json','r') as jsonfile:
-    default_library = json.load(jsonfile)
-    current_library = default_library
+def open_library(library_filename):
+    with open(library_filename,'r') as jsonfile:
+        library = json.load(jsonfile)
+    return library
+
+def set_default_library(library_name):
+    filename = library_name+'.json'
+    with open('default.text','w') as config:
+        config.write(filename)
+
+# Initialze: load library
+try:
+    with open('default.txt','r') as config:
+        default_library = config.read()
+except: print('Cannot find default.txt')
+try:
+    current_library = open_library(default_library)
+except: print('Cannot find library defined in default.txt')
 
 
 # Mainly for parsing abbreviations in the command line:
@@ -206,6 +220,7 @@ def call_librarian(display=display_case):
 
 
 # Initialize:
-
-while True:
-    display_case = call_librarian(display_case)
+try:
+    while True:
+        display_case = call_librarian(display_case)
+except: print('Something went wrong')
