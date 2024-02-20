@@ -23,22 +23,6 @@ try:
 except: print('Cannot find library defined in default.txt')
 
 
-# Mainly for parsing abbreviations in the command line:
-def fieldparser(abbreviation):
-    field_parser_key = {
-        't':'Title',
-        'a':'Attribution',
-        'n':'Edition Notes',
-        'c':'Comments',
-        'r':'Rating'
-        }
-    try:
-        field = field_parser_key[abbreviation]
-    except:
-        field = abbreviation
-    return field
-
-
 # Basic class for reading/writing records to/from library.json
 # Class instance corresponds to a single record pulled from/to be written to library.json
 class text:
@@ -54,7 +38,6 @@ class text:
         return f'{self.info["Title"]} by {self.info["Attribution"]}'
 
     def edit(self,field,entry):
-        field = fieldparser(field)
         self.info[field] = entry
         return self
     
@@ -62,7 +45,6 @@ class text:
 def browse(field,query,source=current_library):
     # "Source" is the deserialized JSON library file.
     findings = []
-    field = fieldparser(field)
     # Rating searches get special code because ints break the in keyword.
     if field == 'Rating':
         query = int(query)
@@ -95,8 +77,22 @@ def write(newrecords,library=current_library):
 
 
 # Command line interface stuff:
-
 display_case = []
+
+# For parsing abbreviations in the command line:
+def fieldparser(abbreviation):
+    field_parser_key = {
+        't':'Title',
+        'a':'Attribution',
+        'n':'Edition Notes',
+        'c':'Comments',
+        'r':'Rating'
+        }
+    try:
+        field = field_parser_key[abbreviation]
+    except:
+        field = abbreviation
+    return field
 
 def line_break_parser(string):
     # User can enter '>>' in command line for a pararaph break
@@ -115,11 +111,15 @@ def create_text(library=current_library):
     newrecord = [newtext]
     return write(newrecord,library)
 
-def change_text_field(field,text):
-    new_field = input(f'Enter {field}: ')
+def change_text_field(text,field):
+    new_field_entry = input(f'Enter {field}: ')
     # User can enter '>>' in command line for a pararaph break:
-    new_field = line_break_parser(new_field)
-    text.info[field] = new_field
+    if field == 'Rating':
+        new_field_entry = int(new_field_entry)
+    # DELETE ONCE GUI IMPLEMENTED:
+    if field in ('Edition Notes', 'Comments'):
+        new_field_entry = line_break_parser(new_field_entry)
+    text.info[field] = new_field_entry
 
 def display_texts(list_of_texts):
     for number, text in enumerate(list_of_texts):
@@ -138,90 +138,55 @@ def call_librarian(display,input):
     params = input[1:]
 
     # Search commands:
-    # [field] [entry]
-    if command in ['a','t']:
-        search_term = ' '.join(params)
+    # search [field] [terms]
+    if command == 'search':
+        field = fieldparser(params[0])
+        search_terms = ' '.join(params[1:])
         try:
-            display = browse(command,search_term)
+            display = browse(field,search_terms)
+            if len(display) > 0:
+                display_texts(display)
+            else:
+                print('Not found.')
         except:
             print('Error: Malformed query.')
-        if len(display) == 0:
-            print('Not found.')
-    if command == 'r':
-        rating = int(params[0])
-        try:
-            display = browse(command,rating)
-        except:
-            print('Error: Malformed query.')
-        if len(display) > 0:
-            display_texts(display)
-        else:
-            print('Not found.')
 
     # Edit commands:
-    # rate [number] [rating]
-    if command == 'rate':
+    # edit [display index] [field]
+    elif command == 'edit':
         display_index = int(params[0])
-        rating = int(params[1])
+        text_to_edit = display[display_index]
+        field = params[1]
+        field = fieldparser(field)
         try:
-            display[display_index].edit('r',rating)
-        except:
-            print('Error: No such text.')
-    # title [number]
-    if command == 'title':
-        display_index = int(params[0])
-        try:
-            change_text_field('Title',display[display_index])
-        except:
-            print('Error: No such text.')
-    # attribution (or att) [number]
-    if command == 'attribution':
-        display_index = int(params[0])
-        try:
-            change_text_field('Attribution',display[display_index])
-        except:
-            print('Error: No such text.')
-    # note [number]
-    if command == 'note':
-        display_index = int(params[0])
-        try:
-            change_text_field('Edition Notes',display[display_index])
-        except:
-            print('Error: No such text.')
-    # comment [number]
-    if command == 'comment':
-        display_index = int(params[0])
-        try:
-            change_text_field('Comments',display[display_index])
+            change_text_field(text_to_edit,field)
+            write([text_to_edit])
         except:
             print('Error: No such text.')
 
     # Open commands
-    # open [number]
-    if command == 'open':
+    # open [display index]
+    elif command == 'open':
         display_index = int(params[0])
         try:
             open_text(display[display_index])
         except:
             print('Error: No such text.')
 
-    if command == 'new':
+    elif command == 'new':
         create_text()
 
-    #if command == 'quit' or 'exit':
-        #sys.exit()
-    display_texts(display)
-    write(display)
-    print('\n')
+    elif command == 'display':
+        display_texts(display)
 
     return display
 
 
 # Initialize: main loop
-try:
-    while True:
-        user_input = input('Instructions: ')
-        if user_input in ('quit','exit'):
-            break
-        display_case = call_librarian(display_case,user_input)
-except: print('Something went wrong')
+while True:
+    print('\n')
+    user_input = input('Instructions: ')
+    print('\n')
+    if user_input in ('quit','exit'):
+        break
+    display_case = call_librarian(display_case,user_input)
