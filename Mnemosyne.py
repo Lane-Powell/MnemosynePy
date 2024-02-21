@@ -88,10 +88,7 @@ def fieldparser(abbreviation):
         'c':'Comments',
         'r':'Rating'
         }
-    try:
-        field = field_parser_key[abbreviation]
-    except:
-        field = abbreviation
+    field = field_parser_key[abbreviation]
     return field
 
 def line_break_parser(string):
@@ -140,44 +137,64 @@ def call_librarian(display,input):
     # Search commands:
     # search [field] [terms]
     if command == 'search':
-        field = fieldparser(params[0])
-        search_terms = ' '.join(params[1:])
         try:
+            field = fieldparser(params[0])
+        except:
+            print('Error: Invalid parameter (field).')
+            field = None
+        search_terms = ' '.join(params[1:])
+        if field is not None:
             display = browse(field,search_terms)
             if len(display) > 0:
                 display_texts(display)
             else:
                 print('Not found.')
-        except:
-            print('Error: Malformed query.')
 
     # Edit commands:
     # edit [display index] [field]
     elif command == 'edit':
-        display_index = int(params[0])
-        text_to_edit = display[display_index]
-        field = params[1]
-        field = fieldparser(field)
         try:
-            change_text_field(text_to_edit,field)
-            write([text_to_edit])
+            display_index = int(params[0])
+            text_to_edit = display[display_index]
         except:
-            print('Error: No such text.')
+            print('Error: Invalid parameter (display index).')
+            display_index = None
+        try:
+            field = params[1]
+            field = fieldparser(field)
+        except:
+           print('Error: Invalid parameter (field).')
+           field = None
+        if field is not None and display_index is not None: 
+            try:
+                text_to_edit = display[display_index]
+                change_text_field(text_to_edit,field)
+                write([text_to_edit])
+            except:
+                print('Error: No such text.')
 
     # Open commands
     # open [display index]
     elif command == 'open':
-        display_index = int(params[0])
         try:
-            open_text(display[display_index])
+            display_index = int(params[0])
         except:
-            print('Error: No such text.')
+            print('Error: Invalid parameter (display index).')
+            display_index = None
+        if display_index is not None:
+            try:
+                open_text(display[display_index])
+            except:
+                print('Error: No such text.')
 
     elif command == 'new':
         create_text()
 
     elif command == 'display':
-        display_texts(display)
+        if len(display) > 0:
+            display_texts(display)
+        else:
+            print('Nothing to display.')
 
     return display
 
