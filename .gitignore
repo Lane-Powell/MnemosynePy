@@ -1,2 +1,4 @@
 __pycache__/
 library.json
+transfer_mnem.py
+default.txt
