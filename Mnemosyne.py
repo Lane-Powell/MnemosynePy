@@ -208,6 +208,12 @@ def call_librarian(display,input):
     elif command == 'commit':
         current_library.commit()
 
+    elif command == 'help':
+        print('See readme.txt')
+
+    else:
+        print('Invalid command.')
+
     return display
 
 
