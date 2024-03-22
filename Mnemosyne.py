@@ -83,8 +83,35 @@ def write_to_library(new_record,library=current_library):
         library.contents[new_record.index] = new_record.info
 
 
-# Command line interface stuff:
+# Command line interface/GUI stuff:
 display_case = []
+
+import tkinter as tk
+
+class InputWindow(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title('Input Window')
+
+        self.label = tk.Label(self, text='Enter your input:')
+        self.label.pack()
+
+        self.entry = tk.Text(self)
+        self.entry.pack()
+
+        self.button = tk.Button(self, text='Done', command=self.save_input)
+        self.button.pack()
+
+    def save_input(self):
+        self.new_field_entry = self.entry.get(1.0,'end')
+        self.destroy()
+
+# Create an instance of the InputWindow class
+# input_window = InputWindow()
+# input_window.mainloop()
+
+# Access the user input after the window is closed
+# print("User input:", input_window.new_field_entry)
 
 # For parsing abbreviations in the command line:
 def fieldparser(abbreviation):
@@ -115,13 +142,17 @@ def create_text():
     return text
 
 def change_text_field(text,field):
-    new_field_entry = input(f'Enter {field}: ')
-    # User can enter '>>' in command line for a pararaph break:
+    if field in ('Edition Notes', 'Comments'):
+        input_window = InputWindow()
+        input_window.mainloop()
+        new_field_entry = input_window.new_field_entry
+        # DELETE ONCE GUI IMPLEMENTED:
+        # User can enter '>>' in command line for a pararaph break:
+        #new_field_entry = line_break_parser(new_field_entry)
+    else:
+        new_field_entry = input(f'Enter {field}: ')
     if field == 'Rating':
         new_field_entry = int(new_field_entry)
-    # DELETE ONCE GUI IMPLEMENTED:
-    if field in ('Edition Notes', 'Comments'):
-        new_field_entry = line_break_parser(new_field_entry)
     text.info[field] = new_field_entry
     return text
 
