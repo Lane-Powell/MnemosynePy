@@ -5,34 +5,54 @@ import json
 
 
 class Library:
-    def __init__(self,name,contents):
+    def __init__(self,name):
         self.name = name
         self.filename = name+'.json'
-        self.contents = contents
+        self.contents = []
 
     def commit(self):
         with open(self.filename, 'w') as jsonfile:
             json.dump(self.contents,jsonfile,indent=4)
 
+# Called by call_librarian() when user attempts to open a library:
+# Acts as a gate to block open_library from accepting invalid filenames
+def check_valid_library(library_name):
+# Check if library_name points to valid Mnemosyne library:
+    with open('config.json','r') as config_file:
+        config = json.load(config_file)
+        for entry in config:
+            if entry['name'] == library_name:
+                return True
+    return False
+
 def open_library(library_name):
-    with open(library_name+'.json','r') as jsonfile:
-        library_contents = json.load(jsonfile)
-    library = Library(library_name,library_contents)
+    library = Library(library_name)
+    with open(library.filename,'r') as library_file:
+        library.contents = json.load(library_file)
     return library
     
 def set_default_library(library_name):
-    filename = library_name+'.json'
-    with open('default.txt','w') as config:
-        config.write(filename)
+    with open('config.json','r') as config_file:
+        config = json.load(config_file)
+        for entry in config:
+            if entry['name'] == library_name:
+                entry['is_default'] = True
+            else:
+                entry['is_default'] = False
+    with open('config.json','w') as config_file:
+        json.dump(config,config_file,indent=4)
 
-# Initialze: load library
+# Initialze: load default library
 try:
-    with open('default.txt','r') as config:
-        default_library_name = config.read()
-except: print('Cannot find default.txt')
+    with open('config.json','r') as config_file:
+        config = json.load(config_file)
+        for entry in config:
+            if entry['is_default']:
+                default_library_name = entry['name']
+except: print('Cannot find config.json')
 try:
     current_library = open_library(default_library_name)
-except: print('Cannot find library defined in default.txt')
+except: print('Cannot find default library defined in config.json')
 
 
 # Basic class for reading/writing records to/from library.json
@@ -54,7 +74,7 @@ class Text:
         return self
 
 
-def browse(field,query,source=current_library):
+def browse(field,query,source):
     # "Source" is the deserialized JSON library file.
     findings = []
     # Rating searches get special code because ints break the in keyword.
@@ -76,7 +96,7 @@ def browse(field,query,source=current_library):
                 findings.append(find)
     return findings
 
-def write_to_library(new_record,library=current_library):
+def write_to_library(new_record,library):
     if new_record.index == -1:
         library.contents.append(new_record.info)
     else:
@@ -105,13 +125,32 @@ class InputWindow(tk.Tk):
     def save_input(self):
         self.new_field_entry = self.entry.get(1.0,'end')
         self.destroy()
-
-# Create an instance of the InputWindow class
+# Create an instance of the InputWindow class:
 # input_window = InputWindow()
 # input_window.mainloop()
-
-# Access the user input after the window is closed
+# Access the user input after the window is closed:
 # print("User input:", input_window.new_field_entry)
+
+def create_library():
+    # Requires user input from command line
+    new_library_name = ' '
+    while ' ' in new_library_name or len(new_library_name) == 0:
+        new_library_name = input('Enter library name (no spaces):')
+    print('Now create the first entry in your new library.')
+    first_entry = create_text()
+    new_library = Library(new_library_name)
+    new_library.contents.append(first_entry.info)
+    # Creates JSON for new library:
+    with open(new_library.filename,'w') as new_library_file:
+        json.dump(new_library.contents,new_library_file,indent=4)
+    # Adds library to config:
+    with open('config.json','r') as config_file:
+        config = json.load(config_file)
+        config.append({'name':new_library_name,'is_default':False})
+    with open('config.json','w') as config_file:
+        json.dump(config,config_file,indent=4)
+    # Returns name so it can be called by open_library
+    return new_library_name
 
 # For parsing abbreviations in the command line:
 def fieldparser(abbreviation):
@@ -146,9 +185,6 @@ def change_text_field(text,field):
         input_window = InputWindow()
         input_window.mainloop()
         new_field_entry = input_window.new_field_entry
-        # DELETE ONCE GUI IMPLEMENTED:
-        # User can enter '>>' in command line for a pararaph break:
-        #new_field_entry = line_break_parser(new_field_entry)
     else:
         new_field_entry = input(f'Enter {field}: ')
     if field == 'Rating':
@@ -182,7 +218,7 @@ def call_librarian(display,input):
             field = None
         search_terms = ' '.join(params[1:])
         if field is not None:
-            display = browse(field,search_terms)
+            display = browse(field,search_terms,current_library)
             if len(display) > 0:
                 display_texts(display)
             else:
@@ -207,7 +243,7 @@ def call_librarian(display,input):
             try:
                 text_to_edit = display[display_index]
                 changed_text = change_text_field(text_to_edit,field)
-                write_to_library(changed_text)
+                write_to_library(changed_text,current_library)
                 display[display_index] = changed_text
             except:
                 print('Error: No such text.')
@@ -228,7 +264,15 @@ def call_librarian(display,input):
 
     elif command == 'new':
         new_text = create_text()
-        write_to_library(new_text)
+        write_to_library(new_text,current_library)
+
+    elif command == 'newlib':
+        new_library = create_library()
+        print('Ready to open.')
+
+    elif command == 'switchdefault':
+        set_default_library(current_library.name)
+        print('Default library changed to current library.')
 
     elif command == 'display':
         if len(display) > 0:
@@ -253,8 +297,22 @@ while True:
     print('\n')
     user_input = input('Instructions: ')
     print('\n')
+    # The following commands are handled outside of the command line because pain:
     if user_input in ('quit','exit'):
         break
+    # openlib [library name]
+    if user_input.startswith('openlib'):
+        user_input = user_input.split()
+        try:
+            library_to_open = user_input[1]
+        except:
+            print('Required parameter: library name.')
+        if check_valid_library(library_to_open):
+            current_library = open_library(library_to_open)
+            print(f'{library_to_open} is now open.')
+        else:
+            print('Invalid library name.')
+        continue
     display_case = call_librarian(display_case,user_input)
 
 current_library.commit()
