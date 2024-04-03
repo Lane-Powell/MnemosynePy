@@ -125,6 +125,42 @@ class InputWindow(tk.Tk):
     def save_input(self):
         self.new_field_entry = self.entry.get(1.0,'end')
         self.destroy()
+
+class NewTextWindow(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title('New Entry')
+
+        self.label = tk.Label(self, text='Enter new text info:')
+        self.label.pack()
+
+        self.text_title = tk.Entry(self)
+        self.text_title.pack()
+
+        self.attribution = tk.Entry(self)
+        self.attribution.pack()
+
+        self.rating = tk.Entry(self)
+        self.rating.pack()
+
+        self.edition_notes = tk.Text(self)
+        self.edition_notes.pack()
+
+        self.comments = tk.Text(self)
+        self.comments.pack()
+
+        self.button = tk.Button(self, text='Done', command=self.save_input)
+        self.button.pack()
+
+    def save_input(self):
+        self.new_text_title = self.text_title.get()
+        self.new_attribution = self.attribution.get()
+        self.new_rating = self.rating.get()
+        self.new_edition_notes = self.edition_notes.get(1.0,'end')
+        self.new_comments = self.comments.get(1.0,'end')
+        self.destroy()
+
+
 # Create an instance of the InputWindow class:
 # input_window = InputWindow()
 # input_window.mainloop()
@@ -164,6 +200,7 @@ def fieldparser(abbreviation):
     field = field_parser_key[abbreviation]
     return field
 
+# No longer used:
 def line_break_parser(string):
     # User can enter '>>' in command line for a pararaph break
     # Called by other functions
@@ -173,11 +210,20 @@ def line_break_parser(string):
 def create_text():
     # Requires user input from command line
     text = Text()
-    text.info['Title'] = input('Enter title: ')
-    text.info['Attribution'] = input('Enter attribution: ')
-    text.info['Rating'] = int(input('Enter rating: '))
-    text.info['Edition Notes'] = line_break_parser(input('Enter edition notes: '))
-    text.info['Comments'] = line_break_parser(input('Enter comments: '))
+
+    new_text_window = NewTextWindow()
+    new_text_window.mainloop()
+    text.info['Title'] = new_text_window.new_text_title
+    text.info['Attribution'] = new_text_window.new_attribution
+    text.info['Rating'] = int(new_text_window.new_rating)
+    text.info['Edition Notes'] = new_text_window.new_edition_notes
+    text.info['Comments'] = new_text_window.new_comments
+
+    # text.info['Title'] = input('Enter title: ')
+    # text.info['Attribution'] = input('Enter attribution: ')
+    # text.info['Rating'] = int(input('Enter rating: '))
+    # text.info['Edition Notes'] = line_break_parser(input('Enter edition notes: '))
+    # text.info['Comments'] = line_break_parser(input('Enter comments: '))
     return text
 
 def change_text_field(text,field):
