@@ -109,7 +109,7 @@ display_case = []
 import tkinter as tk
 
 class InputWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self, existing_entry=''):
         super().__init__()
         self.title('Input Window')
 
@@ -117,6 +117,7 @@ class InputWindow(tk.Tk):
         self.label.pack()
 
         self.entry = tk.Text(self)
+        self.entry.insert(tk.END, existing_entry)
         self.entry.pack()
 
         self.button = tk.Button(self, text='Done', command=self.save_input)
@@ -228,7 +229,7 @@ def create_text():
 
 def change_text_field(text,field):
     if field in ('Edition Notes', 'Comments'):
-        input_window = InputWindow()
+        input_window = InputWindow(text.info[field])
         input_window.mainloop()
         new_field_entry = input_window.new_field_entry
     else:
