@@ -42,18 +42,6 @@ def set_default_library(library_name):
     with open('config.json','w') as config_file:
         json.dump(config,config_file,indent=4)
 
-# Initialze: load default library
-try:
-    with open('config.json','r') as config_file:
-        config = json.load(config_file)
-        for entry in config:
-            if entry['is_default']:
-                default_library_name = entry['name']
-except: print('Cannot find config.json')
-try:
-    current_library = open_library(default_library_name)
-except: print('Cannot find default library defined in config.json')
-
 
 # Basic class for reading/writing records to/from library.json
 # Class instance corresponds to a single record pulled from/to be written to library.json
@@ -104,7 +92,6 @@ def write_to_library(new_record,library):
 
 
 # Command line interface/GUI stuff:
-display_case = []
 
 import tkinter as tk
 
@@ -339,27 +326,42 @@ def call_librarian(display,input):
     return display
 
 
-# Initialize: main loop
-while True:
-    print('\n')
-    user_input = input('Instructions: ')
-    print('\n')
-    # The following commands are handled outside of the command line because pain:
-    if user_input in ('quit','exit'):
-        break
-    # openlib [library name]
-    if user_input.startswith('openlib'):
-        user_input = user_input.split()
-        try:
-            library_to_open = user_input[1]
-        except:
-            print('Required parameter: library name.')
-        if check_valid_library(library_to_open):
-            current_library = open_library(library_to_open)
-            print(f'{library_to_open} is now open.')
-        else:
-            print('Invalid library name.')
-        continue
-    display_case = call_librarian(display_case,user_input)
+if __name__ == '__main__':
+# Initialze: load default library
+    try:
+        with open('config.json','r') as config_file:
+            config = json.load(config_file)
+            for entry in config:
+                if entry['is_default']:
+                    default_library_name = entry['name']
+    except: print('Cannot find config.json')
+    try:
+        current_library = open_library(default_library_name)
+    except: print('Cannot find default library defined in config.json')
 
-current_library.commit()
+    display_case = []
+
+    # Initialize: main loop
+    while True:
+        print('\n')
+        user_input = input('Instructions: ')
+        print('\n')
+        # The following commands are handled outside of the command line because pain:
+        if user_input in ('quit','exit'):
+            break
+        # openlib [library name]
+        if user_input.startswith('openlib'):
+            user_input = user_input.split()
+            try:
+                library_to_open = user_input[1]
+            except:
+                print('Required parameter: library name.')
+            if check_valid_library(library_to_open):
+                current_library = open_library(library_to_open)
+                print(f'{library_to_open} is now open.')
+            else:
+                print('Invalid library name.')
+            continue
+        display_case = call_librarian(display_case,user_input)
+
+    current_library.commit()
