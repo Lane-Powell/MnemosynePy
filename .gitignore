@@ -1,4 +1,4 @@
 __pycache__/
-library.json
+*.json
 transfer_mnem.py
-default.txt
+todo.txt
