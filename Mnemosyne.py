@@ -111,7 +111,8 @@ class InputWindow(tk.Tk):
         self.button.pack()
 
     def save_input(self):
-        self.new_field_entry = self.entry.get(1.0,'end')
+        self.new_field_entry = self.entry.get(1.0,'end').strip()
+        # strip() to remove newline automatically added by tk.Text
         self.destroy()
 
 class NewTextWindow(tk.Tk):
@@ -144,8 +145,9 @@ class NewTextWindow(tk.Tk):
         self.new_text_title = self.text_title.get()
         self.new_attribution = self.attribution.get()
         self.new_rating = self.rating.get()
-        self.new_edition_notes = self.edition_notes.get(1.0,'end')
-        self.new_comments = self.comments.get(1.0,'end')
+        self.new_edition_notes = self.edition_notes.get(1.0,'end').strip()
+        self.new_comments = self.comments.get(1.0,'end').strip()
+        # strip() to remove newline automatically added by tk.Text
         self.destroy()
 
 
