@@ -239,14 +239,17 @@ def open_text(text):
         else:
             print(f'{field.capitalize()}: {entry}')
 
-def call_librarian(display,input):
+def call_librarian(status,display,input):
     input = input.split()
     command = input[0]
     params = input[1:]
 
     # Search commands:
     # search [field] [terms]
-    if command == 'search':
+    #if command in ('quit','exit'):
+    if command == 'quit' or command == 'exit':
+        return (False, display)
+    elif command == 'search':
         try:
             field = fieldparser(params[0])
         except:
@@ -325,7 +328,8 @@ def call_librarian(display,input):
     else:
         print('Invalid command.')
 
-    return display
+    #status = (running, display)
+    return (True, display)
 
 
 if __name__ == '__main__':
@@ -341,16 +345,17 @@ if __name__ == '__main__':
         current_library = open_library(default_library_name)
     except: print('Cannot find default library defined in config.json')
 
-    display_case = []
+    status = True
+    display = []
 
     # Initialize: main loop
-    while True:
+    while status == True:
         print('\n')
         user_input = input('Instructions: ')
         print('\n')
         # The following commands are handled outside of the command line because pain:
-        if user_input in ('quit','exit'):
-            break
+        # if user_input in ('quit','exit'):
+        #     break
         # openlib [library name]
         if user_input.startswith('openlib'):
             user_input = user_input.split()
@@ -364,6 +369,8 @@ if __name__ == '__main__':
             else:
                 print('Invalid library name.')
             continue
-        display_case = call_librarian(display_case,user_input)
+        call = call_librarian(status, display, user_input)
+        status = call[0]
+        display = call[1]
 
     current_library.commit()
