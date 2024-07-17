@@ -5,13 +5,13 @@ import json
 
 
 class Library:
-    def __init__(self,name):
+    def __init__(self, name):
         self.name = name
         self.filename = name+'.json'
         self.contents = []
 
     def commit(self):
-        with open(self.filename, 'w') as jsonfile:
+        with open(self.filename,'w') as jsonfile:
             json.dump(self.contents,jsonfile,indent=4)
 
 # Called by call_librarian() when user attempts to open a library:
@@ -44,7 +44,7 @@ def set_default_library(library_name):
 
 
 # Basic class for reading/writing records to/from library.json
-# Class instance corresponds to a single record pulled from/to be written to library.json
+# Instance corresponds to a single record pulled from/to be written to library.json
 class Text:
     def __init__(self):
         # Index of entry in library.json
@@ -57,12 +57,12 @@ class Text:
     def __repr__(self):
         return f'{self.info["Title"]} by {self.info["Attribution"]}'
 
-    def edit(self,field,entry):
+    def edit(self, field, entry):
         self.info[field] = entry
         return self
 
 
-def browse(field,query,source):
+def browse(field, query, source):
     # "Source" is the deserialized JSON library file.
     findings = []
     # Rating searches get special code because ints break the in keyword.
@@ -84,7 +84,7 @@ def browse(field,query,source):
                 findings.append(find)
     return findings
 
-def write_to_library(new_record,library):
+def write_to_library(new_record, library):
     if new_record.index == -1:
         library.contents.append(new_record.info)
     else:
@@ -150,7 +150,6 @@ class NewTextWindow(tk.Tk):
         # strip() to remove newline automatically added by tk.Text
         self.destroy()
 
-
 # Create an instance of the InputWindow class:
 # input_window = InputWindow()
 # input_window.mainloop()
@@ -158,7 +157,7 @@ class NewTextWindow(tk.Tk):
 # print("User input:", input_window.new_field_entry)
 
 def create_library():
-    # Requires user input from command line
+    # Requires user input from command line.
     new_library_name = ' '
     while ' ' in new_library_name or len(new_library_name) == 0:
         new_library_name = input('Enter library name (no spaces):')
@@ -175,7 +174,7 @@ def create_library():
         config.append({'name':new_library_name,'is_default':False})
     with open('config.json','w') as config_file:
         json.dump(config,config_file,indent=4)
-    # Returns name so it can be called by open_library
+    # Returns name so it can be called by open_library:
     return new_library_name
 
 # For parsing abbreviations in the command line:
@@ -190,15 +189,8 @@ def fieldparser(abbreviation):
     field = field_parser_key[abbreviation]
     return field
 
-# No longer used:
-def line_break_parser(string):
-    # User can enter '>>' in command line for a pararaph break
-    # Called by other functions
-    string = string.replace('>>','\n\n')
-    return string
-
 def create_text():
-    # Requires user input from command line
+    # Requires user input from command line.
     text = Text()
 
     new_text_window = NewTextWindow()
@@ -209,15 +201,10 @@ def create_text():
     text.info['Edition Notes'] = new_text_window.new_edition_notes
     text.info['Comments'] = new_text_window.new_comments
 
-    # text.info['Title'] = input('Enter title: ')
-    # text.info['Attribution'] = input('Enter attribution: ')
-    # text.info['Rating'] = int(input('Enter rating: '))
-    # text.info['Edition Notes'] = line_break_parser(input('Enter edition notes: '))
-    # text.info['Comments'] = line_break_parser(input('Enter comments: '))
     return text
 
-def change_text_field(text,field):
-    if field in ('Edition Notes', 'Comments'):
+def change_text_field(text, field):
+    if field in ('Edition Notes','Comments'):
         input_window = InputWindow(text.info[field])
         input_window.mainloop()
         new_field_entry = input_window.new_field_entry
@@ -242,15 +229,14 @@ def open_text(text):
         else:
             print(f'{field.capitalize()}: {entry}')
 
-def call_librarian(display,current_library,input):
+def call_librarian(display, current_library, input):
     input = input.split()
     command = input[0]
     params = input[1:]
 
     # Search commands:
     # search [field] [terms]
-    #if command in ('quit','exit'):
-    if command == 'quit' or command == 'exit':
+    if command in ('quit','exit'):
         return (False, display, current_library)
     elif command == 'search':
         try:
@@ -260,7 +246,7 @@ def call_librarian(display,current_library,input):
             field = None
         search_terms = ' '.join(params[1:])
         if field is not None:
-            display = browse(field,search_terms,current_library)
+            display = browse(field, search_terms, current_library)
             if len(display) > 0:
                 display_texts(display)
             else:
@@ -290,7 +276,7 @@ def call_librarian(display,current_library,input):
             except:
                 print('Error: No such text.')
 
-    # Open commands
+    # Open commands:
     # open [display index]
     elif command == 'open':
         try:
@@ -306,7 +292,7 @@ def call_librarian(display,current_library,input):
 
     elif command == 'new':
         new_text = create_text()
-        write_to_library(new_text,current_library)
+        write_to_library(new_text, current_library)
 
     elif command == 'newlib':
         new_library = create_library()
@@ -316,7 +302,7 @@ def call_librarian(display,current_library,input):
         set_default_library(current_library.name)
         print('Default library changed to current library.')
 
-    # Open a library (and close current library)
+    # Open a library (and close current library):
     # openlib [library name]
     elif command == 'openlib':
         try:
@@ -345,12 +331,11 @@ def call_librarian(display,current_library,input):
     else:
         print('Invalid command.')
 
-    #status = (running, display)
     return (True, display, current_library)
 
 
 if __name__ == '__main__':
-# Initialze: load default library
+    # Initialze: load default library
     try:
         with open('config.json','r') as config_file:
             config = json.load(config_file)
@@ -365,7 +350,7 @@ if __name__ == '__main__':
     status = True
     display = []
 
-    # Initialize: main loop
+    # Main loop:
     while status == True:
         print('\n')
         user_input = input('Instructions: ')
