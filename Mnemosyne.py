@@ -224,7 +224,10 @@ def change_text_field(text,field):
     else:
         new_field_entry = input(f'Enter {field}: ')
     if field == 'Rating':
-        new_field_entry = int(new_field_entry)
+        try:
+            new_field_entry = int(new_field_entry)
+        except ValueError:
+            print('Error: Invalid parameter (rating must be an integer).')
     text.info[field] = new_field_entry
     return text
 
@@ -352,6 +355,9 @@ if __name__ == '__main__':
     while status == True:
         print('\n')
         user_input = input('Instructions: ')
+        # Don't accept input if blank:
+        if len(user_input) == 0 or user_input.isspace():
+            continue
         print('\n')
         # The following commands are handled outside of the command line because pain:
         # if user_input in ('quit','exit'):
