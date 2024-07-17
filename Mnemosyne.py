@@ -242,7 +242,7 @@ def open_text(text):
         else:
             print(f'{field.capitalize()}: {entry}')
 
-def call_librarian(status,display,input):
+def call_librarian(display,current_library,input):
     input = input.split()
     command = input[0]
     params = input[1:]
@@ -251,7 +251,7 @@ def call_librarian(status,display,input):
     # search [field] [terms]
     #if command in ('quit','exit'):
     if command == 'quit' or command == 'exit':
-        return (False, display)
+        return (False, display, current_library)
     elif command == 'search':
         try:
             field = fieldparser(params[0])
@@ -316,6 +316,20 @@ def call_librarian(status,display,input):
         set_default_library(current_library.name)
         print('Default library changed to current library.')
 
+    # Open a library (and close current library)
+    # openlib [library name]
+    elif command == 'openlib':
+        try:
+            library_to_open = params[0]
+        except IndexError:
+            print('Required parameter: library name.')
+            return (True, display, current_library)
+        if check_valid_library(library_to_open):
+            current_library = open_library(library_to_open)
+            print(f'{library_to_open} is now open.')
+        else:
+            print('Invalid library name.')
+
     elif command == 'display':
         if len(display) > 0:
             display_texts(display)
@@ -332,7 +346,7 @@ def call_librarian(status,display,input):
         print('Invalid command.')
 
     #status = (running, display)
-    return (True, display)
+    return (True, display, current_library)
 
 
 if __name__ == '__main__':
@@ -359,24 +373,9 @@ if __name__ == '__main__':
         if len(user_input) == 0 or user_input.isspace():
             continue
         print('\n')
-        # The following commands are handled outside of the command line because pain:
-        # if user_input in ('quit','exit'):
-        #     break
-        # openlib [library name]
-        if user_input.startswith('openlib'):
-            user_input = user_input.split()
-            try:
-                library_to_open = user_input[1]
-            except:
-                print('Required parameter: library name.')
-            if check_valid_library(library_to_open):
-                current_library = open_library(library_to_open)
-                print(f'{library_to_open} is now open.')
-            else:
-                print('Invalid library name.')
-            continue
-        call = call_librarian(status, display, user_input)
+        call = call_librarian(display, current_library, user_input)
         status = call[0]
         display = call[1]
+        current_library = call[2]
 
     current_library.commit()
