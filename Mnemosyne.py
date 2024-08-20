@@ -116,9 +116,9 @@ class InputWindow(tk.Tk):
         self.destroy()
 
 class NewTextWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self, title):
         super().__init__()
-        self.title('New Entry')
+        self.title(title)
 
         self.label = tk.Label(self, text='Enter new text info:')
         self.label.pack()
@@ -195,7 +195,7 @@ def create_text():
     # Requires user input from command line.
     text = Text()
 
-    new_text_window = NewTextWindow()
+    new_text_window = NewTextWindow('New Entry')
     new_text_window.mainloop()
     text.info['Title'] = new_text_window.new_text_title
     text.info['Attribution'] = new_text_window.new_attribution
@@ -221,13 +221,20 @@ def change_text_field(text, field):
     return text
 
 def change_all_text_fields(text):
-    new_text_window = NewTextWindow()
-    new_text_window.mainloop()
-    text.info['Title'] = new_text_window.new_text_title
-    text.info['Attribution'] = new_text_window.new_attribution
-    text.info['Rating'] = int(new_text_window.new_rating)
-    text.info['Edition Notes'] = new_text_window.new_edition_notes
-    text.info['Comments'] = new_text_window.new_comments
+    edit_text_window = NewTextWindow('Edit Entry')
+    # Populate fields with current entries:
+    edit_text_window.text_title.insert(tk.END,text.info['Title'])
+    edit_text_window.attribution.insert(tk.END,text.info['Attribution'])
+    edit_text_window.rating.insert(tk.END,text.info['Rating'])
+    edit_text_window.edition_notes.insert(tk.END,text.info['Edition Notes'])
+    edit_text_window.comments.insert(tk.END,text.info['Comments'])
+    # Get new entries:
+    edit_text_window.mainloop()
+    text.info['Title'] = edit_text_window.new_text_title
+    text.info['Attribution'] = edit_text_window.new_attribution
+    text.info['Rating'] = int(edit_text_window.new_rating)
+    text.info['Edition Notes'] = edit_text_window.new_edition_notes
+    text.info['Comments'] = edit_text_window.new_comments
     return text
 
 def display_texts(list_of_texts):
