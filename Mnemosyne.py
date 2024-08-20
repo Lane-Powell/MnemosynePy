@@ -179,6 +179,8 @@ def create_library():
 
 # For parsing abbreviations in the command line:
 def fieldparser(abbreviation):
+    if abbreviation not in ('t','a','n','c','r'):
+        raise ValueError('invalid field abbreviation')
     field_parser_key = {
         't':'Title',
         'a':'Attribution',
@@ -218,6 +220,16 @@ def change_text_field(text, field):
     text.info[field] = new_field_entry
     return text
 
+def change_all_text_fields(text):
+    new_text_window = NewTextWindow()
+    new_text_window.mainloop()
+    text.info['Title'] = new_text_window.new_text_title
+    text.info['Attribution'] = new_text_window.new_attribution
+    text.info['Rating'] = int(new_text_window.new_rating)
+    text.info['Edition Notes'] = new_text_window.new_edition_notes
+    text.info['Comments'] = new_text_window.new_comments
+    return text
+
 def display_texts(list_of_texts):
     for number, text in enumerate(list_of_texts):
         print(f'[{number}]: {text}')
@@ -255,26 +267,37 @@ def call_librarian(display, current_library, input):
     # Edit commands:
     # edit [display index] [field]
     elif command == 'edit':
+        # Get text to edit:
         try:
-            display_index = int(params[0])
-            text_to_edit = display[display_index]
-        except:
+            display_index = params[0]
+        except IndexError:
+            print('Error: Missing parameter (display index).')
+            return (True, display, current_library)
+        try:
+            display_index = int(display_index)
+        except ValueError:
             print('Error: Invalid parameter (display index).')
-            display_index = None
+            return (True, display, current_library)
         try:
-            field = params[1]
-            field = fieldparser(field)
-        except:
-           print('Error: Invalid parameter (field).')
-           field = None
-        if field is not None and display_index is not None: 
+            text_to_edit = display[display_index]
+        except IndexError:
+            print('Error: No such text.')
+            return (True, display, current_library)
+        # Get field to edit if any and execute:
+        if len(params) < 2:
+            changed_text = change_all_text_fields(text_to_edit)
+        else:
             try:
-                text_to_edit = display[display_index]
-                changed_text = change_text_field(text_to_edit,field)
-                write_to_library(changed_text,current_library)
-                display[display_index] = changed_text
-            except:
-                print('Error: No such text.')
+                field = params[1]
+                field = fieldparser(field)
+            except ValueError:
+                print('Error: Invalid parameter (field abbreviation).')
+                return (True, display, current_library)
+            changed_text = change_text_field(text_to_edit,field)
+        # Save edit:
+        write_to_library(changed_text,current_library)
+        display[display_index] = changed_text
+
 
     # Open commands:
     # open [display index]
