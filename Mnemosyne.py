@@ -263,14 +263,20 @@ def change_text_field(text, field):
     if field in ('Edition Notes','Comments'):
         input_window = InputWindow(text.info[field])
         input_window.mainloop()
-        new_field_entry = input_window.new_field_entry
+        text.info[field] = input_window.new_field_entry
+        return text
     else:
         new_field_entry = input(f'Enter {field}: ')
+    # Validate input:
+    if len(new_field_entry.strip()) == 0:
+        print('Error: Field cannot be empty.')
+        return text
     if field == 'Rating':
         try:
             new_field_entry = int(new_field_entry)
         except ValueError:
             print('Error: Invalid parameter (rating must be an integer).')
+            return text
     text.info[field] = new_field_entry
     return text
 
