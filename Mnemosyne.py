@@ -203,11 +203,24 @@ def fieldparser(abbreviation):
     return field
 
 def create_text():    
+    # These variables will be used to save unproblematic user input for another try 
+    # in case some input is invalid:
+    default_edition_notes = ''
+    default_comments = ''
+    # Notes and comments only since they are optional
+    # and potentially lengthy/annoying to lose
+    
     # Receive and validate input:
     while (True):
+        # Set new text fields to default values:
+        new_edition_notes = default_edition_notes
+        new_comments = default_comments
         new_text_window = NewTextWindow('New Entry')
-        new_text_window.mainloop()
+        new_text_window.edition_notes.insert(tk.END,new_edition_notes)
+        new_text_window.comments.insert(tk.END,new_comments)
 
+        # Get user input:
+        new_text_window.mainloop()
         new_title = new_text_window.new_title
         new_attribution = new_text_window.new_attribution
         new_rating = new_text_window.new_rating
@@ -216,7 +229,10 @@ def create_text():
 
         # Title and attribution are required (can't be emptry or whitespace):
         if len(new_title.strip()) == 0 or len(new_attribution.strip()) == 0:
-            error_window = ErrorWindow('Error: Title and attribution are required.')
+            # Set defaults fields for next loop:
+            default_edition_notes = new_edition_notes
+            default_comments = new_comments
+            error_window = ErrorWindow('Error: Title and Attribution are required.')
             error_window.mainloop()
             continue
         # If rating is empty or whitespace, set to 0:
@@ -226,6 +242,9 @@ def create_text():
         try:
             new_rating = int(new_rating)
         except ValueError:
+            # Set defaults fields for next loop:
+            default_edition_notes = new_edition_notes
+            default_comments = new_comments
             error_window = ErrorWindow('Error: Rating must be an integer.')
             error_window.mainloop()
             continue
