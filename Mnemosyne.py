@@ -142,13 +142,24 @@ class NewTextWindow(tk.Tk):
         self.button.pack()
 
     def save_input(self):
-        self.new_text_title = self.text_title.get()
+        self.new_title = self.text_title.get()
         self.new_attribution = self.attribution.get()
         self.new_rating = self.rating.get()
         self.new_edition_notes = self.edition_notes.get(1.0,'end').strip()
         self.new_comments = self.comments.get(1.0,'end').strip()
         # strip() to remove newline automatically added by tk.Text
         self.destroy()
+
+class ErrorWindow(tk.Tk):
+    def __init__(self, error):
+        super().__init__()
+        self.title('Error')
+
+        self.label = tk.Label(self, text=error)
+        self.label.pack()
+
+        self.button = tk.Button(self, text='Okay', command=self.destroy)
+        self.button.pack()
 
 # Create an instance of the InputWindow class:
 # input_window = InputWindow()
@@ -191,18 +202,42 @@ def fieldparser(abbreviation):
     field = field_parser_key[abbreviation]
     return field
 
-def create_text():
-    # Requires user input from command line.
+def create_text():    
+    # Receive and validate input:
+    while (True):
+        new_text_window = NewTextWindow('New Entry')
+        new_text_window.mainloop()
+
+        new_title = new_text_window.new_title
+        new_attribution = new_text_window.new_attribution
+        new_rating = new_text_window.new_rating
+        new_edition_notes = new_text_window.new_edition_notes
+        new_comments = new_text_window.new_comments
+
+        # Title and attribution are required (can't be emptry or whitespace):
+        if len(new_title.strip()) == 0 or len(new_attribution.strip()) == 0:
+            error_window = ErrorWindow('Error: Title and attribution are required.')
+            error_window.mainloop()
+            continue
+        # If rating is empty or whitespace, set to 0:
+        if len(new_rating.strip()) == 0:
+            new_rating = 0
+            break
+        try:
+            new_rating = int(new_rating)
+        except ValueError:
+            error_window = ErrorWindow('Error: Rating must be an integer.')
+            error_window.mainloop()
+            continue
+        break
+
+    # Save input to text object:
     text = Text()
-
-    new_text_window = NewTextWindow('New Entry')
-    new_text_window.mainloop()
-    text.info['Title'] = new_text_window.new_text_title
-    text.info['Attribution'] = new_text_window.new_attribution
-    text.info['Rating'] = int(new_text_window.new_rating)
-    text.info['Edition Notes'] = new_text_window.new_edition_notes
-    text.info['Comments'] = new_text_window.new_comments
-
+    text.info['Title'] = new_title
+    text.info['Attribution'] = new_attribution
+    text.info['Rating'] = new_rating
+    text.info['Edition Notes'] = new_edition_notes
+    text.info['Comments'] = new_comments
     return text
 
 def change_text_field(text, field):
@@ -230,7 +265,7 @@ def change_all_text_fields(text):
     edit_text_window.comments.insert(tk.END,text.info['Comments'])
     # Get new entries:
     edit_text_window.mainloop()
-    text.info['Title'] = edit_text_window.new_text_title
+    text.info['Title'] = edit_text_window.new_title
     text.info['Attribution'] = edit_text_window.new_attribution
     text.info['Rating'] = int(edit_text_window.new_rating)
     text.info['Edition Notes'] = edit_text_window.new_edition_notes
