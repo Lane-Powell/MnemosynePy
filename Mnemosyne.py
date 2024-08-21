@@ -492,7 +492,7 @@ if __name__ == '__main__':
     try:
         current_library = open_library(default_library_name)
     except FileNotFoundError: print('Cannot find default library defined in config.json')
-    print('Default library: {current_library.name} is open.')
+    print(f'{current_library.name} is open.')
 
     status = True
     display = []
