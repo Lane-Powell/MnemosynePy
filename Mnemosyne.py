@@ -253,23 +253,32 @@ def call_librarian(display, current_library, input):
     command = input[0]
     params = input[1:]
 
-    # Search commands:
-    # search [field] [terms]
+    # print(len(params))
+    
     if command in ('quit','exit'):
         return (False, display, current_library)
+
+    # Search commands:
+    # search [field] [terms]
     elif command == 'search':
+        if len(params) == 0:
+            print('Error: Missing parameter (field abbreviation).')
+            print('Error: Missing parameter (search terms).')
+            return (True, display, current_library)
+        if len(params) == 1:
+            print('Error: Missing parameter (search terms).')
+            return (True, display, current_library)
         try:
             field = fieldparser(params[0])
-        except:
-            print('Error: Invalid parameter (field).')
-            field = None
+        except ValueError:
+            print('Error: Invalid parameter (field abbreviation).')
+            return (True, display, current_library)
         search_terms = ' '.join(params[1:])
-        if field is not None:
-            display = browse(field, search_terms, current_library)
-            if len(display) > 0:
-                display_texts(display)
-            else:
-                print('Not found.')
+        display = browse(field, search_terms, current_library)
+        if len(display) > 0:
+            display_texts(display)
+        else:
+            print('Not found.')
 
     # Edit commands:
     # edit [display index] [field]
@@ -309,16 +318,20 @@ def call_librarian(display, current_library, input):
     # Open commands:
     # open [display index]
     elif command == 'open':
+        if len(params) == 0:
+            print('Error: Missing parameter (display index).')
+            return (True, display, current_library)
         try:
             display_index = int(params[0])
-        except:
+        except ValueError:
             print('Error: Invalid parameter (display index).')
-            display_index = None
-        if display_index is not None:
-            try:
-                open_text(display[display_index])
-            except:
-                print('Error: No such text.')
+            return (True, display, current_library)
+        try:
+            text_to_open = display[display_index]
+        except IndexError:
+            print('Error: No such text.')
+            return (True, display, current_library)
+        open_text(display[display_index])
 
     elif command == 'new':
         new_text = create_text()
@@ -372,10 +385,10 @@ if __name__ == '__main__':
             for entry in config:
                 if entry['is_default']:
                     default_library_name = entry['name']
-    except: print('Cannot find config.json')
+    except FileNotFoundError: print('Cannot find config.json')
     try:
         current_library = open_library(default_library_name)
-    except: print('Cannot find default library defined in config.json')
+    except FileNotFoundError: print('Cannot find default library defined in config.json')
 
     status = True
     display = []
