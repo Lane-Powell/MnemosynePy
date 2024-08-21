@@ -275,20 +275,58 @@ def change_text_field(text, field):
     return text
 
 def change_all_text_fields(text):
-    edit_text_window = NewTextWindow('Edit Entry')
-    # Populate fields with current entries:
-    edit_text_window.text_title.insert(tk.END,text.info['Title'])
-    edit_text_window.attribution.insert(tk.END,text.info['Attribution'])
-    edit_text_window.rating.insert(tk.END,text.info['Rating'])
-    edit_text_window.edition_notes.insert(tk.END,text.info['Edition Notes'])
-    edit_text_window.comments.insert(tk.END,text.info['Comments'])
-    # Get new entries:
-    edit_text_window.mainloop()
-    text.info['Title'] = edit_text_window.new_title
-    text.info['Attribution'] = edit_text_window.new_attribution
-    text.info['Rating'] = int(edit_text_window.new_rating)
-    text.info['Edition Notes'] = edit_text_window.new_edition_notes
-    text.info['Comments'] = edit_text_window.new_comments
+    # These variables will be used to save existing and unproblematic user input for another try 
+    # in case some input is invalid:
+    existing_edition_notes = text.info['Edition Notes']
+    existing_comments = text.info['Comments']
+    # Notes and comments only since they are optional
+    # and potentially lengthy/annoying to lose
+    
+    while (True):
+        edit_text_window = NewTextWindow('Edit Entry')
+        # Populate fields with current entries:
+        edit_text_window.text_title.insert(tk.END,text.info['Title'])
+        edit_text_window.attribution.insert(tk.END,text.info['Attribution'])
+        edit_text_window.rating.insert(tk.END,text.info['Rating'])
+        edit_text_window.edition_notes.insert(tk.END,existing_edition_notes)
+        edit_text_window.comments.insert(tk.END,existing_comments)
+        # Get new entries:
+        edit_text_window.mainloop()
+        new_title = edit_text_window.new_title
+        new_attribution = edit_text_window.new_attribution
+        new_rating = edit_text_window.new_rating
+        new_edition_notes = edit_text_window.new_edition_notes
+        new_comments = edit_text_window.new_comments
+
+        # Title and attribution are required (can't be emptry or whitespace):
+        if len(new_title.strip()) == 0 or len(new_attribution.strip()) == 0:
+            # Set defaults fields for next loop:
+            existing_edition_notes = new_edition_notes
+            existing_comments = new_comments
+            error_window = ErrorWindow('Error: Title and Attribution are required.')
+            error_window.mainloop()
+            continue
+        # If rating is empty or whitespace, set to 0:
+        if len(new_rating.strip()) == 0:
+            new_rating = 0
+            break
+        try:
+            new_rating = int(new_rating)
+        except ValueError:
+            # Set defaults fields for next loop:
+            existing_edition_notes = new_edition_notes
+            existing_comments = new_comments
+            error_window = ErrorWindow('Error: Rating must be an integer.')
+            error_window.mainloop()
+            continue
+        break
+
+    # Save new entries:
+    text.info['Title'] = new_title
+    text.info['Attribution'] = new_attribution
+    text.info['Rating'] = new_rating
+    text.info['Edition Notes'] = new_edition_notes
+    text.info['Comments'] = new_comments
     return text
 
 def display_texts(list_of_texts):
