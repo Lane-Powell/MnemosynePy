@@ -350,8 +350,6 @@ def call_librarian(display, current_library, input):
     input = input.split()
     command = input[0]
     params = input[1:]
-
-    # print(len(params))
     
     if command in ('quit','exit'):
         return (False, display, current_library)
@@ -463,6 +461,8 @@ def call_librarian(display, current_library, input):
         else:
             print('Nothing to display.')
     
+    # Manual commit:
+    # Unnecessary due to autocommit below
     elif command == 'commit':
         current_library.commit()
 
@@ -471,6 +471,10 @@ def call_librarian(display, current_library, input):
 
     else:
         print('Invalid command.')
+
+    # Autocommit changes if any:
+    if command in ('edit', 'new'):
+        current_library.commit()
 
     return (True, display, current_library)
 
