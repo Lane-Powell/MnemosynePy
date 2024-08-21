@@ -431,6 +431,7 @@ def call_librarian(display, current_library, input):
 
     elif command == 'new':
         new_text = create_text()
+        display.append(new_text)
         write_to_library(new_text, current_library)
 
     elif command == 'newlib':
