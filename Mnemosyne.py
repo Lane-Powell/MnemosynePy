@@ -254,18 +254,19 @@ def create_text():
 
     # Save input to text object:
     text = Text()
-    text.info['Title'] = new_title
-    text.info['Attribution'] = new_attribution
-    text.info['Rating'] = new_rating
-    text.info['Edition Notes'] = new_edition_notes
-    text.info['Comments'] = new_comments
+    text.edit('Title', new_title)
+    text.edit('Attribution', new_attribution)
+    text.edit('Rating', new_rating)
+    text.edit('Edition Notes', new_edition_notes)
+    text.edit('Comments', new_comments)
     return text
 
 def change_text_field(text, field):
     if field in ('Edition Notes','Comments'):
         input_window = InputWindow(text.info[field])
         input_window.mainloop()
-        text.info[field] = input_window.new_field_entry
+        new_field_entry = input_window.new_field_entry
+        text.edit(field, new_field_entry)
         return text
     else:
         new_field_entry = input(f'Enter {field}: ')
@@ -279,7 +280,7 @@ def change_text_field(text, field):
         except ValueError:
             print('Error: Invalid parameter (rating must be an integer).')
             return text
-    text.info[field] = new_field_entry
+    text.edit(field, new_field_entry)
     return text
 
 def change_all_text_fields(text):
@@ -330,11 +331,11 @@ def change_all_text_fields(text):
         break
 
     # Save new entries:
-    text.info['Title'] = new_title
-    text.info['Attribution'] = new_attribution
-    text.info['Rating'] = new_rating
-    text.info['Edition Notes'] = new_edition_notes
-    text.info['Comments'] = new_comments
+    text.edit('Title', new_title)
+    text.edit('Attribution', new_attribution)
+    text.edit('Rating', new_rating)
+    text.edit('Edition Notes', new_edition_notes)
+    text.edit('Comments', new_comments)
     return text
 
 def display_texts(list_of_texts):
