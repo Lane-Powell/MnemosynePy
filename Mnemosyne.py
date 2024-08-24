@@ -65,13 +65,12 @@ class Text:
         return self
 
 
-def browse(field, query, source):
-    # "Source" is the deserialized JSON library file.
+def browse(field, query, library):
     findings = []
     # Rating searches get special code because ints break the in keyword.
     if field == 'Rating':
         query = int(query)
-        for (index, record) in enumerate(source.contents):
+        for (index, record) in enumerate(library.contents):
             if query == record[field]:
                 find = Text()
                 find.info = record
@@ -79,7 +78,7 @@ def browse(field, query, source):
                 findings.append(find)
     # Code for all other searches:
     else:
-        for (index, record) in enumerate(source.contents):
+        for (index, record) in enumerate(library.contents):
             if query.lower() in record[field].lower():
                 find = Text()
                 find.info = record
