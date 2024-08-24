@@ -14,6 +14,9 @@ class Library:
         with open(self.filename,'w') as jsonfile:
             json.dump(self.contents,jsonfile,indent=4)
 
+    def delete_entry(self, index):
+        self.contents.pop(index)
+
 # Called by call_librarian() when user attempts to open a library:
 # Acts as a gate to block open_library from accepting invalid filenames
 def check_valid_library(library_name):
@@ -346,10 +349,10 @@ def open_text(text):
         else:
             print(f'{field.capitalize()}: {entry}')
 
-def call_librarian(display, current_library, input):
-    input = input.split()
-    command = input[0]
-    params = input[1:]
+def call_librarian(display, current_library, user_input):
+    user_input = user_input.split()
+    command = user_input[0]
+    params = user_input[1:]
     
     if command in ('quit','exit'):
         return (False, display, current_library)
@@ -434,6 +437,32 @@ def call_librarian(display, current_library, input):
         display.append(new_text)
         write_to_library(new_text, current_library)
 
+    # Delete commands:
+    # del [display index]
+    # delete [display index]
+    elif command == 'del':
+        if len(params) == 0:
+            print('Error: Missing parameter (display index).')
+            return (True, display, current_library)
+        try:
+            display_index = int(params[0])
+        except ValueError:
+            print('Error: Invalid parameter (display index).')
+            return (True, display, current_library)
+        try:
+            text_to_delete = display[display_index]
+        except IndexError:
+            print('Error: No such text.')
+            return (True, display, current_library)
+        print(f'Are you sure you want to delete entry {params[0]} ({display[0]})?')
+        confirmation = input('y/n: ')
+        if confirmation == 'n':
+            print('Nothing deleted.')
+            return (True, display, current_library)
+        current_library.delete_entry(text_to_delete.index)
+        display.pop(display_index)
+        print('Entry deleted.')
+
     elif command == 'newlib':
         new_library = create_library()
         print('Ready to open.')
@@ -474,7 +503,7 @@ def call_librarian(display, current_library, input):
         print('Invalid command.')
 
     # Autocommit changes if any:
-    if command in ('edit', 'new'):
+    if command in ('edit', 'new', 'del'):
         current_library.commit()
 
     return (True, display, current_library)
