@@ -177,7 +177,12 @@ def create_library(name):
     # Add to config:
     with open('config.json','r') as config_file:
         config = json.load(config_file)
-        config.append({'name':name,'is_default':False})
+        # If config is currently empty, add as default library:
+        if len(config) == 0:
+            config.append({'name':name,'is_default':True})
+        # Else add as non-default library:
+        else:
+            config.append({'name':name,'is_default':False})
     with open('config.json','w') as config_file:
         json.dump(config,config_file,indent=4)
     return open_library(name)
@@ -507,28 +512,40 @@ def call_librarian(display, current_library, user_input):
 
 if __name__ == '__main__':
     # Initialze: load default library
+    # Open config.json and search for default library name:
+    default_library_name = None
+    current_library = None
     try:
         with open('config.json','r') as config_file:
             config = json.load(config_file)
-            for entry in config:
-                if entry['is_default']:
-                    default_library_name = entry['name']
+            # If config is empty, prompt user to create default library:
+            if len(config) == 0:
+                print('No libraries defined in config.json. Please create one.')
+                call_librarian([], None, 'newlib')
+            # Else open default library:
+            else:
+                for entry in config:
+                    if entry['is_default']:
+                        default_library_name = entry['name']
     except FileNotFoundError: print('Cannot find config.json')
-    try:
-        current_library = open_library(default_library_name)
-    except FileNotFoundError: print('Cannot find default library defined in config.json')
-    print(f'{current_library.name} is open.')
+    # Try to open default library:
+    if default_library_name:
+        try:
+            current_library = open_library(default_library_name)
+        except FileNotFoundError: print('Cannot find default library defined in config.json')
+        print(f'{current_library.name} is open.')
+    if not current_library:
+        print('No default library defined. Create a new library or open an existing one. Set as default with command: switchdefault')
 
     status = True
     display = []
-
+ 
     # Main loop:
     while status == True:
         user_input = input('Instructions: ')
         # Don't accept input if blank:
         if len(user_input) == 0 or user_input.isspace():
             continue
-        #print('\n')
         call = call_librarian(display, current_library, user_input)
         status = call[0]
         display = call[1]
