@@ -457,7 +457,7 @@ def call_librarian(display, current_library, user_input):
 
     elif command == 'newlib':
         new_library_name = input('Enter new library name (must be a valid filename, no spaces): ')
-        if len(new_library_name.strip()) == 0:
+        if len(new_library_name.strip()) == 0 or ' ' in new_library_name:
             print('Error: Invalid library name.')
             return (True, display, current_library)
         new_library = create_library(new_library_name)
