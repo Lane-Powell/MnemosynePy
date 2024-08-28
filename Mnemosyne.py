@@ -169,26 +169,18 @@ class ErrorWindow(tk.Tk):
 # Access the user input after the window is closed:
 # print("User input:", input_window.new_field_entry)
 
-def create_library():
-    # Requires user input from command line.
-    new_library_name = ' '
-    while ' ' in new_library_name or len(new_library_name) == 0:
-        new_library_name = input('Enter library name (no spaces):')
-    print('Now create the first entry in your new library.')
-    first_entry = create_text()
-    new_library = Library(new_library_name)
-    new_library.contents.append(first_entry.info)
-    # Creates JSON for new library:
+def create_library(name):
+    new_library = Library(name)
+    # Save to file:
     with open(new_library.filename,'w') as new_library_file:
         json.dump(new_library.contents,new_library_file,indent=4)
-    # Adds library to config:
+    # Add to config:
     with open('config.json','r') as config_file:
         config = json.load(config_file)
-        config.append({'name':new_library_name,'is_default':False})
+        config.append({'name':name,'is_default':False})
     with open('config.json','w') as config_file:
         json.dump(config,config_file,indent=4)
-    # Returns name so it can be called by open_library:
-    return new_library_name
+    return open_library(name)
 
 # For parsing abbreviations in the command line:
 def fieldparser(abbreviation):
@@ -464,8 +456,12 @@ def call_librarian(display, current_library, user_input):
         print('Entry deleted.')
 
     elif command == 'newlib':
-        new_library = create_library()
-        print('Ready to open.')
+        new_library_name = input('Enter new library name (must be a valid filename, no spaces): ')
+        if len(new_library_name.strip()) == 0:
+            print('Error: Invalid library name.')
+            return (True, display, current_library)
+        new_library = create_library(new_library_name)
+        print(f'{new_library_name} is now open.')
 
     elif command == 'switchdefault':
         set_default_library(current_library.name)
