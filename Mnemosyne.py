@@ -356,7 +356,7 @@ def call_librarian(display, current_library, user_input):
 
     # Search commands:
     # search [field] [terms]
-    elif command == 'search':
+    elif command == 'search' or command == 'search+':
         if not current_library:
             print('Error: No open library to search.')
             return (True, display, current_library)
@@ -373,7 +373,10 @@ def call_librarian(display, current_library, user_input):
             print('Error: Invalid parameter (field abbreviation).')
             return (True, display, current_library)
         search_terms = ' '.join(params[1:])
-        display = browse(field, search_terms, current_library)
+        if command.endswith('+'):
+            display = display + browse(field, search_terms, current_library)
+        else:
+            display = browse(field, search_terms, current_library)
         if len(display) > 0:
             display_texts(display)
         else:
