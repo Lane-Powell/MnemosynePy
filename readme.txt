@@ -6,6 +6,7 @@ The record format is intentionally minimal, and is not intended to track detaile
 
 Although Mnemosyne mainly uses the command line for its interface, it also uses the Tkinter GUI library to streamline editing certain fields and for creating new records.
 
+
 2. Requirements
 You must have Python 3 installed to use Mnemosyne.
 You must also have Tkinter installed (run "pip install tk" if not).
@@ -38,11 +39,15 @@ Use the "display" command to print the titles currently in the display. Use the 
 
 
 4. Libraries
-Mnemosyne supports multiple library files. (For example, one for a reading log, another for a book wishlist.)
+Mnemosyne supports multiple library files. (For example, one for a reading log, another for a book wishlist.) Library information is storied in config.json.
 
-On launch, Mnemosyne opens the library defined as default in config.json. To open another library, use the "newlib" command. To switch the default library to whichever is currently open, use "switchdefault."
+If you are opening Mnemosyne for the first time, or if the config is otherwise blank, the program will prompt you to create a library. It will be marked as the default libarary automatically. If you have goodreads data to import, be sure to run goodreads_library_scanner.py first (see Section 7).
 
-If you are opening Mnemosyne for the first time, the program will automatically run the "newlib" command, prompting you to create your first library and record. If you have goodreads data to import, be sure to run goodreads_library_scanner.py first (see Section 7).
+Once a library is created and defined as default, Mnemosyne will open it on launch. To open another library, use the "newlib" command. To switch the default library to whichever is currently open, use "switchdefault".
+
+If for some reason 
+
+If you are opening Mnemosyne for the first time, or if the config is otherwise blank, the program will prompt you to create a library. If you have goodreads data to import, be sure to run goodreads_library_scanner.py first (see Section 7).
 
 To remove a library, library files and their associated config.json entries must be deleted manually through.
 
@@ -53,7 +58,7 @@ search [field abbreviation] [search term]
 - Searches selected field in all records in the current library. The search term does not have to be a single word. Returns by overwriting the display.
 
 search+ [field abbreviation] [search term]
-- Same as search, except any records it retrieves are appended to the current display.
+- Same as search, except any records it retrieves are added to the existing display.
 
 display
 - Prints the list of titles currently in the display along with their indices.
@@ -108,7 +113,7 @@ Comments
 
 Field Abbreviations:
 t = Title
-a = Attributio
+a = Attribution
 r = Rating
 n = Edition Notes
 c = Comments
@@ -119,7 +124,7 @@ c = Comments
 The package includes two additional utilities in the form of Python scripts:
 
 goodreads_library_scanner.py
-- If you have downloaded you goodreads data as a CSV file, this script will convert is to Mnemosyne's JSON format. Run it the same way you would run Mnemosyne, making sure it and your goodreads data is in the same folder as Mnemosyne and config.json. The script will ask whether you want to import read, to-read, or all books, what your library should be named, and whether it should be the default library.
+- If you have downloaded your goodreads data as a CSV file, this script will convert it to Mnemosyne's JSON format. Run it the same way you would run Mnemosyne, making sure it and your goodreads data is in the same folder as Mnemosyne.py and config.json. The script will ask what your new library should be named, and whether you want to import read, to-read, or all books.
 
 witerate.py
-- A simple to to iterate linearly, record by record, through a library file, for example to edit records that have been imported from the goodreads scanner.
+- A simple tool to iterate linearly, record by record, through a library file, for example to edit records that have been imported from the goodreads scanner.
