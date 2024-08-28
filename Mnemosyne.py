@@ -357,6 +357,9 @@ def call_librarian(display, current_library, user_input):
     # Search commands:
     # search [field] [terms]
     elif command == 'search':
+        if not current_library:
+            print('Error: No open library to search.')
+            return (True, display, current_library)
         if len(params) == 0:
             print('Error: Missing parameter (field abbreviation).')
             print('Error: Missing parameter (search terms).')
@@ -478,13 +481,13 @@ def call_librarian(display, current_library, user_input):
         try:
             library_to_open = params[0]
         except IndexError:
-            print('Required parameter: library name.')
+            print('Error: Missing parameter (library name).')
             return (True, display, current_library)
         if check_valid_library(library_to_open):
             current_library = open_library(library_to_open)
             print(f'{library_to_open} is now open.')
         else:
-            print('Invalid library name.')
+            print('Error: Invalid library name.')
 
     elif command == 'display':
         if len(display) > 0:
@@ -501,7 +504,7 @@ def call_librarian(display, current_library, user_input):
         print('See readme.txt')
 
     else:
-        print('Invalid command.')
+        print('Error: Invalid command.')
 
     # Autocommit changes if any:
     if command in ('edit', 'new', 'del'):
