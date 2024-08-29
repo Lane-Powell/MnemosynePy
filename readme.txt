@@ -121,10 +121,6 @@ c = Comments
 
 7. Other Tools
 
-The package includes two additional utilities in the form of Python scripts:
+The package includes an additional Python script called goodreads_library_scanner.py.
 
-goodreads_library_scanner.py
-- If you have downloaded your goodreads data as a CSV file, this script will convert it to Mnemosyne's JSON format. Run it the same way you would run Mnemosyne, making sure it and your goodreads data is in the same folder as Mnemosyne.py and config.json. The script will ask what your new library should be named, and whether you want to import read, to-read, or all books.
-
-witerate.py
-- A simple tool to iterate linearly, record by record, through a library file, for example to edit records that have been imported from the goodreads scanner.
+If you have downloaded your goodreads data as a CSV file, this script will convert it to Mnemosyne's JSON format. Run it the same way you would run Mnemosyne, making sure it and your goodreads data is in the same folder as Mnemosyne.py and config.json. The script will ask what your new library should be named, and whether you want to import read, to-read, or all books.
