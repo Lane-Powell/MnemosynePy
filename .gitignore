@@ -1,5 +1,3 @@
 __pycache__/
 *.json
-transfer_mnem.py
-todo.txt
-witercount.txt
+*.txt
