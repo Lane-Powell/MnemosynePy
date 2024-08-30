@@ -497,11 +497,6 @@ def call_librarian(display, current_library, user_input):
             display_texts(display)
         else:
             print('Nothing to display.')
-    
-    # Manual commit:
-    # Unnecessary due to autocommit below
-    elif command == 'commit':
-        current_library.commit()
 
     elif command == 'help':
         print('See readme.txt')
@@ -510,7 +505,7 @@ def call_librarian(display, current_library, user_input):
         print('Error: Invalid command.')
 
     # Autocommit changes if any:
-    if command in ('edit', 'new', 'del'):
+    if current_library and command in ('edit', 'new', 'del'):
         current_library.commit()
 
     return (True, display, current_library)
@@ -533,7 +528,11 @@ if __name__ == '__main__':
                 for entry in config:
                     if entry['is_default']:
                         default_library_name = entry['name']
-    except FileNotFoundError: print('Cannot find config.json')
+    except FileNotFoundError:
+        print('Cannot find config.json.')
+        print('Creating config.json...')
+        with open('config.json','w') as config_file:
+            json.dump([],config_file,indent=4)
     # Try to open default library:
     if default_library_name:
         try:
@@ -541,7 +540,7 @@ if __name__ == '__main__':
         except FileNotFoundError: print('Cannot find default library defined in config.json')
         print(f'{current_library.name} is open.')
     if not current_library:
-        print('No default library defined. Create a new library or open an existing one. Set as default with command: switchdefault')
+        print('No default library defined. Create a new library with command: newlib, or open an existing one. Set as default with command: switchdefault')
 
     status = True
     display = []
@@ -557,5 +556,5 @@ if __name__ == '__main__':
         display = call[1]
         current_library = call[2]
         #print('\n')
-
-    current_library.commit()
+    if current_library:
+        current_library.commit()
