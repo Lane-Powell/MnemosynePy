@@ -473,6 +473,7 @@ def call_librarian(display, current_library, user_input):
             return (True, display, current_library)
         new_library = create_library(new_library_name)
         print(f'{new_library_name} is now open.')
+        current_library = new_library
 
     elif command == 'switchdefault':
         set_default_library(current_library.name)
