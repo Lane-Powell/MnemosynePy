@@ -457,7 +457,7 @@ def call_librarian(display, current_library, user_input):
         except IndexError:
             print('Error: No such text.')
             return (True, display, current_library)
-        print(f'Are you sure you want to delete entry {params[0]} ({display[0]})?')
+        print(f'Are you sure you want to delete entry {display_index} ({display[display_index]})?')
         confirmation = input('y/n: ')
         if confirmation == 'n':
             print('Nothing deleted.')
